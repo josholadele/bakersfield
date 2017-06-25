@@ -60,7 +60,7 @@ public class RecipeDetailFragment extends Fragment implements ExoPlayer.EventLis
     LinearLayout playerWrapper;
 
     JSONArray stepsJSON;
-    private MediaSessionCompat mMediaSession;
+    private static MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mStateBuilder;
     long playerPosition = 0;
 
@@ -264,6 +264,14 @@ public class RecipeDetailFragment extends Fragment implements ExoPlayer.EventLis
 
     }
 
+    public void releasePlayer() {
+        if (mExoPlayer != null) {
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
+    }
+
     @Override
     public void onTimelineChanged(Timeline timeline, Object manifest) {
 
@@ -281,6 +289,13 @@ public class RecipeDetailFragment extends Fragment implements ExoPlayer.EventLis
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releasePlayer();
+        mMediaSession.setActive(false);
     }
 
     @Override

@@ -27,6 +27,9 @@ import com.josholadele.bakersfield.R;
 import com.josholadele.bakersfield.model.Recipe;
 import com.josholadele.bakersfield.provider.BakersFieldContract;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import static com.josholadele.bakersfield.RecipeDetailFragment.ARG_ITEM;
 
 
@@ -103,6 +106,22 @@ class GridRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
         String servingsText = mContext.getString(R.string.string_servings, servings);
         views.setTextViewText(R.id.recipe_servings, servingsText);
         views.setTextViewText(R.id.recipe_title, name);
+        String ingredientList = "";
+        try {
+            JSONArray ingredientsJSON = new JSONArray(ingredients);
+            for (int i = 0; i < ingredientsJSON.length(); i++) {
+
+                JSONObject ingredientItemJSON = ingredientsJSON.getJSONObject(i);
+                ingredientList = ingredientList + (mContext.getString(R.string.ingredient_item,
+                        String.valueOf(ingredientItemJSON.getDouble("quantity")),
+                        ingredientItemJSON.getString("measure"),
+                        ingredientItemJSON.getString("ingredient")));
+
+            }
+        } catch (Exception ignored) {
+
+        }
+        views.setTextViewText(R.id.ingredient_item, ingredientList);
         // Always hide the water drop in GridView mode
 //        views.setViewVisibility(R.id.widget_water_button, View.GONE);
 

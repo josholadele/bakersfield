@@ -50,7 +50,6 @@ public class FetchRecipeData extends AsyncTask<Void, Void, Void> {
         try {
             for (int i = 0; i < response.length(); i++) {
                 try {
-
                     JSONObject recipeObject = response.getJSONObject(i);
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(BakersFieldEntry.COLUMN_IMAGE_URL, recipeObject.getString(KEY_IMAGE));
@@ -60,7 +59,6 @@ public class FetchRecipeData extends AsyncTask<Void, Void, Void> {
                     contentValues.put(BakersFieldEntry.COLUMN_SERVINGS, recipeObject.getInt(KEY_SERVINGS));
                     contentValues.put(BakersFieldEntry.COLUMN_RECIPE_ID, recipeObject.getInt(KEY_ID));
                     mContext.getContentResolver().insert(BakersFieldEntry.CONTENT_URI, contentValues);
-
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -78,8 +76,9 @@ public class FetchRecipeData extends AsyncTask<Void, Void, Void> {
 
     private boolean isRedirect(VolleyError error) {
         try {
-            return error.networkResponse != null && (error.networkResponse.statusCode == HttpURLConnection.HTTP_MOVED_PERM || error.networkResponse.statusCode == HttpURLConnection.HTTP_MOVED_TEMP);
-        }catch (Exception ignored){
+            return error.networkResponse != null && (error.networkResponse.statusCode == HttpURLConnection.HTTP_MOVED_PERM
+                    || error.networkResponse.statusCode == HttpURLConnection.HTTP_MOVED_TEMP);
+        } catch (Exception ignored) {
             return false;
         }
     }

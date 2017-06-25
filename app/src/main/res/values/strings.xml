@@ -8,6 +8,7 @@
     <string name="previous">Previous</string>
     <string name="next">Next</string>
     <string name="string_servings">Servings: %1$d</string>
+    <string name="string_widget_servings">(Servings: %1$d)</string>
     <string name="appwidget_text">BakersField</string>
     <string name="add_widget">Add widget</string>
     <string name="empty_view_text">No Recipe Found</string>

@@ -14,11 +14,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.josholadele.bakersfield.data.FetchRecipeData;
 import com.josholadele.bakersfield.model.Recipe;
 import com.josholadele.bakersfield.provider.BakersFieldContract;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +52,7 @@ public class RecipeListActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
 
-        adapter = new SimpleItemRecyclerViewAdapter(recipes);
+        adapter = new SimpleItemRecyclerViewAdapter(this, recipes);
 
         loadRecipesFromDb();
 
@@ -156,9 +158,11 @@ public class RecipeListActivity extends AppCompatActivity {
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private List<Recipe> mValues;
+        private Context mContext;
 
-        SimpleItemRecyclerViewAdapter(List<Recipe> items) {
+        SimpleItemRecyclerViewAdapter(Context context, List<Recipe> items) {
             mValues = items;
+            mContext = context;
         }
 
         @Override
@@ -175,16 +179,22 @@ public class RecipeListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mItem = mValues.get(position);
+            holder.mRecipe = mValues.get(position);
             holder.mRecipeTitle.setText(mValues.get(position).getName());
             holder.mServings.setText(getString(R.string.string_servings, mValues.get(position).getServings()));
+            if (!Utils.isEmpty(holder.mRecipe.getImageUrl())) {
+                Picasso.with(mContext)
+                        .load(holder.mRecipe.getImageUrl())
+                        .placeholder(getResources().getDrawable(R.drawable.recipe))
+                        .into(holder.mRecipeImage);
+            }
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mTwoPane) {
                         Bundle arguments = new Bundle();
-                        arguments.putParcelable(RecipeDetailFragment.ARG_ITEM, holder.mItem);
+                        arguments.putParcelable(RecipeDetailFragment.ARG_ITEM, holder.mRecipe);
                         RecipeDetailFragment fragment = new RecipeDetailFragment();
                         fragment.setArguments(arguments);
                         getSupportFragmentManager().beginTransaction()
@@ -193,7 +203,7 @@ public class RecipeListActivity extends AppCompatActivity {
                     } else {
                         Context context = v.getContext();
                         Intent intent = new Intent(context, RecipeDetailsActivity.class);
-                        intent.putExtra(RecipeDetailFragment.ARG_ITEM, holder.mItem);
+                        intent.putExtra(RecipeDetailFragment.ARG_ITEM, holder.mRecipe);
 
                         context.startActivity(intent);
                     }
@@ -211,13 +221,15 @@ public class RecipeListActivity extends AppCompatActivity {
             public final View mView;
             public final TextView mRecipeTitle;
             public final TextView mServings;
-            public Recipe mItem;
+            public final ImageView mRecipeImage;
+            public Recipe mRecipe;
 
             public ViewHolder(View view) {
                 super(view);
                 mView = view;
                 mRecipeTitle = (TextView) view.findViewById(R.id.recipe_title);
                 mServings = (TextView) view.findViewById(R.id.recipe_servings);
+                mRecipeImage = (ImageView) view.findViewById(R.id.recipe_image);
             }
 
             @Override
