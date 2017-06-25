@@ -49,9 +49,9 @@ public class RecipeDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail_list);
         mFragmentManager = getSupportFragmentManager();
-
-        mItem = getIntent().getExtras().getParcelable(ARG_ITEM);
-
+        if (getIntent() != null && getIntent().hasExtra(ARG_ITEM)) {
+            mItem = getIntent().getExtras().getParcelable(ARG_ITEM);
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
@@ -129,7 +129,7 @@ public class RecipeDetailsActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, final int position) {
+        public void onBindViewHolder(final ViewHolder holder, int position) {
 
             holder.mItem = mRecipe;
             if (position == 0) {
@@ -149,14 +149,16 @@ public class RecipeDetailsActivity extends AppCompatActivity {
                 } catch (Exception ignored) {
 
                 }
-
+                final int positionInt = position;
                 holder.mView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
+
                         if (mTwoPane) {
                             Bundle arguments = new Bundle();
                             arguments.putParcelable(ARG_ITEM, mRecipe);
-                            arguments.putInt(ARG_STEP_POSITION, position - 1);
+                            arguments.putInt(ARG_STEP_POSITION, positionInt - 1);
                             RecipeDetailFragment fragment = new RecipeDetailFragment();
                             fragment.setArguments(arguments);
                             FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
@@ -169,7 +171,7 @@ public class RecipeDetailsActivity extends AppCompatActivity {
                         } else {
                             Bundle arguments = new Bundle();
                             arguments.putParcelable(ARG_ITEM, mRecipe);
-                            arguments.putInt(ARG_STEP_POSITION, position - 1);
+                            arguments.putInt(ARG_STEP_POSITION, positionInt - 1);
                             RecipeDetailFragment fragment = new RecipeDetailFragment();
                             fragment.setArguments(arguments);
 
