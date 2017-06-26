@@ -3,6 +3,7 @@ package com.josholadele.bakersfield;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -10,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -31,6 +33,7 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.josholadele.bakersfield.model.Recipe;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,6 +57,7 @@ public class RecipeDetailFragment extends Fragment implements ExoPlayer.EventLis
     TextView descriptionTextView;
     TextView nextTextView;
     TextView previousTextView;
+    ImageView thumbnailImage;
     SimpleExoPlayerView mPlayerView;
     SimpleExoPlayer mExoPlayer;
     LinearLayout bottomLayout;
@@ -94,6 +98,7 @@ public class RecipeDetailFragment extends Fragment implements ExoPlayer.EventLis
         descriptionTextView = (TextView) rootView.findViewById(R.id.tv_description);
         nextTextView = (TextView) rootView.findViewById(R.id.next_step);
         previousTextView = (TextView) rootView.findViewById(R.id.previous_step);
+        thumbnailImage = (ImageView) rootView.findViewById(R.id.placeholder_image);
         mPlayerView = (SimpleExoPlayerView) rootView.findViewById(R.id.step_video_player);
         bottomLayout = (LinearLayout) rootView.findViewById(R.id.step_bottom_layout);
 //        playerWrapper = (LinearLayout) rootView.findViewById(R.id.player_layout);
@@ -104,7 +109,8 @@ public class RecipeDetailFragment extends Fragment implements ExoPlayer.EventLis
             boolean hasVideo = false;
             try {
                 stepsJSON = new JSONArray(recipe.getSteps());
-                hasVideo = !Utils.isEmpty(stepsJSON.getJSONObject(CURRENT_STEP).getString("videoURL"));
+                hasVideo = !stepsJSON.getJSONObject(CURRENT_STEP).getString("videoURL").isEmpty();
+//                hasVideo = !Utils.isEmpty(stepsJSON.getJSONObject(CURRENT_STEP).getString("videoURL"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -185,11 +191,34 @@ public class RecipeDetailFragment extends Fragment implements ExoPlayer.EventLis
         try {
             shortDescriptionTextView.setText(stepsJSON.getJSONObject(currentStep).getString("shortDescription"));
             descriptionTextView.setText(stepsJSON.getJSONObject(currentStep).getString("description"));
-            boolean hasVideo = !Utils.isEmpty(stepsJSON.getJSONObject(currentStep).getString("videoURL"));
-            initializePlayer(Uri.parse(stepsJSON.getJSONObject(currentStep).getString("videoURL")), currentStep, hasVideo);
+            boolean hasVideo = !stepsJSON.getJSONObject(currentStep).getString("videoURL").isEmpty();
+//            boolean hasVideo = !Utils.isEmpty(stepsJSON.getJSONObject(currentStep).getString("videoURL"));
+            Uri videoURI = Uri.parse(stepsJSON.getJSONObject(currentStep).getString("videoURL"));
+            if (hasVideo && videoURI != null) {
+                toggleThumbnail(false, null);
+                initializePlayer(videoURI, currentStep, hasVideo);
+            } else {
+                releasePlayer();
+                mMediaSession.setActive(false);
+                toggleThumbnail(true, stepsJSON.getJSONObject(currentStep).getString("thumbnailURL"));
+            }
             CURRENT_STEP = currentStep;
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void toggleThumbnail(boolean thumbnail, @Nullable String thumbnailUrl) {
+        if (thumbnail) {
+            mPlayerView.setVisibility(View.GONE);
+            thumbnailImage.setVisibility(View.VISIBLE);
+        } else {
+            mPlayerView.setVisibility(View.VISIBLE);
+            thumbnailImage.setVisibility(View.GONE);
+            if (!Utils.isEmpty(thumbnailUrl)) {
+                Picasso.with(getContext()).load(Uri.parse(thumbnailUrl))
+                        .into(thumbnailImage);
+            }
         }
     }
 
@@ -273,6 +302,20 @@ public class RecipeDetailFragment extends Fragment implements ExoPlayer.EventLis
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        releasePlayer();
+        mMediaSession.setActive(false);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        releasePlayer();
+        mMediaSession.setActive(false);
+    }
+
+    @Override
     public void onTimelineChanged(Timeline timeline, Object manifest) {
 
     }
@@ -289,13 +332,6 @@ public class RecipeDetailFragment extends Fragment implements ExoPlayer.EventLis
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        releasePlayer();
-        mMediaSession.setActive(false);
     }
 
     @Override

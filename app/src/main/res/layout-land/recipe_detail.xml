@@ -6,19 +6,29 @@
     android:keepScreenOn="true"
     android:orientation="vertical">
 
-    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
-        android:id="@+id/step_video_player"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:resize_mode="fixed_width" />
 
-
-    <ImageView
-        android:id="@+id/placeholder_image"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:contentDescription=""
-        android:visibility="gone" />
+        android:background="@color/colorAccent">
+
+        <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+            android:id="@+id/step_video_player"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:resize_mode="fixed_width" />
+
+
+        <ImageView
+            android:id="@+id/placeholder_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.7"
+            android:contentDescription=""
+            android:scaleType="centerInside"
+            android:src="@drawable/recipe"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/step_bottom_layout"

@@ -17,9 +17,12 @@
 package com.josholadele.bakersfield;
 
 
+import android.content.Intent;
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.contrib.RecyclerViewActions;
+import android.support.test.espresso.intent.Intents;
+import android.support.test.espresso.intent.matcher.IntentMatchers;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
@@ -36,6 +39,8 @@ import static android.support.test.espresso.intent.Intents.intended;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent;
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static com.josholadele.bakersfield.RecipeDetailFragment.ARG_ITEM;
+import static org.hamcrest.Matchers.allOf;
 
 /**
  * This test demos a user clicking the decrement button and verifying that it properly decrease
@@ -59,16 +64,32 @@ public class RecipeListActivityTest {
 
 
     @Test
-    public void checkItemZeroIsIngredient() {
+    public void checkRecipeKeyInIntent() {
 
-        // Check the initial quantity variable is zero
-//        onView(withId(R.id.recipe_list))    .check(RecyclerViewActions.scrollToPosition(0));
-
-
+        Intents.init();
         onView(withId(R.id.recipe_list))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
+
+        Matcher<Intent> expectedIntent = allOf(
+                IntentMatchers.hasExtraWithKey(ARG_ITEM));
+
         intended(hasComponent(RecipeDetailsActivity.class.getName()));
+        intended(expectedIntent);
+        Intents.release();
+
+    }
+
+    @Test
+    public void checkDetailsIntentLaunched() {
+
+        Intents.init();
+        onView(withId(R.id.recipe_list))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+
+
+        intended(hasComponent(RecipeDetailsActivity.class.getName()));
+        Intents.release();
 
     }
 

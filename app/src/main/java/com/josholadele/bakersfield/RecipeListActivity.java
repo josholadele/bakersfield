@@ -81,17 +81,19 @@ public class RecipeListActivity extends AppCompatActivity {
                 adapter.setRecipeData(recipes);
                 showDataView();
             } else {
-                new FetchRecipeData(RecipeListActivity.this, new RecipeDataCallback() {
-                    @Override
-                    public void onDataReceived() {
-                        loadRecipesFromDb();
-                    }
+                if (Utils.isNetworkAvailable(this)) {
+                    new FetchRecipeData(RecipeListActivity.this, new RecipeDataCallback() {
+                        @Override
+                        public void onDataReceived() {
+                            loadRecipesFromDb();
+                        }
 
-                    @Override
-                    public void onReceiveFailed() {
-                        showErrorView();
-                    }
-                }).execute();
+                        @Override
+                        public void onReceiveFailed() {
+                            showErrorView();
+                        }
+                    }).execute();
+                }
             }
             cursor.close();
         } else {
@@ -182,7 +184,7 @@ public class RecipeListActivity extends AppCompatActivity {
             holder.mRecipe = mValues.get(position);
             holder.mRecipeTitle.setText(mValues.get(position).getName());
             holder.mServings.setText(getString(R.string.string_servings, mValues.get(position).getServings()));
-            if (!Utils.isEmpty(holder.mRecipe.getImageUrl())) {
+            if (!holder.mRecipe.getImageUrl().isEmpty()) {
                 Picasso.with(mContext)
                         .load(holder.mRecipe.getImageUrl())
                         .placeholder(getResources().getDrawable(R.drawable.recipe))
